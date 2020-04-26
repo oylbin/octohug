@@ -160,25 +160,18 @@ func visit(path string, fileInfo os.FileInfo, err error) error {
 			}
 		} else if strings.Contains(octopressLineAsString, "date: ") {
 			parts := strings.Split(octopressLineAsString, " ")
-			hugoFileWriter.WriteString("date = \"" + parts[1] + "\"\n")
-			octoSlugDate := strings.Replace(parts[1], "-", "/", -1)
+            datestr := strings.Replace(parts[1], "'", "", -1)
+			hugoFileWriter.WriteString("date = \"" + datestr + "\"\n")
+			octoSlugDate := strings.Replace(datestr , "-", "/", -1)
+            // octopressFilenameWithoutExtension 里没有中文，这样确保slug里没有中文
 			octoFriendlySlug := octoSlugDate + "/" + octopressFilenameWithoutExtension
+			//octoFriendlySlug = strings.Replace(octoFriendlySlug, "%", "%25", -1)
 			hugoFileWriter.WriteString("slug = \"" + octoFriendlySlug + "\"\n")
 		} else if strings.Contains(octopressLineAsString, "title: ") {
-            // FIXME title 中包含中文字符的问题
-			// to keep the urls the same as octopress, the title
-			// needs to be the filename
-			parts := strings.Split(octopressFilenameWithoutExtension, "-")
-			hugoFileWriter.WriteString("title = \"")
-			firstPart := true
-			for _, part := range parts {
-				if !firstPart {
-					hugoFileWriter.WriteString(" ")
-				}
-				hugoFileWriter.WriteString(part)
-				firstPart = false
-			}
-			hugoFileWriter.WriteString("\"\n")
+            // 保留 title , title里可能有中文
+			title := octopressLineAsString[7:len(octopressLineAsString)]
+			title = strings.Replace(title, "\"", "", -1)
+			hugoFileWriter.WriteString("title = \""+ title+"\"\n")
 		} else if strings.Contains(octopressLineAsString, "description: ") {
 			parts := strings.Split(octopressLineAsString, ": ")
 			hugoFileWriter.WriteString("description = " + parts[1] + "\n")
@@ -191,8 +184,9 @@ func visit(path string, fileInfo os.FileInfo, err error) error {
 		} else if strings.Contains(octopressLineAsString, "author_login: ") {
 		} else if strings.Contains(octopressLineAsString, "author_email: ") {
 		} else if strings.Contains(octopressLineAsString, "date_gmt: ") {
+		} else if strings.Contains(octopressLineAsString, "status: ") {
 		} else if strings.Contains(octopressLineAsString, "published: ") {
-			hugoFileWriter.WriteString("published = false\n")
+			//hugoFileWriter.WriteString("published = false\n")
 		} else if strings.Contains(octopressLineAsString, "include_code") {
 			parts := strings.Split(octopressLineAsString, " ")
 			// can be:
