@@ -151,13 +151,13 @@ func visit(path string, fileInfo os.FileInfo, err error) error {
 				if firstTagAdded {
 					hugoFileWriter.WriteString(", ")
 				}
-				hugoFileWriter.WriteString("\"" + matches[1] + "\"")
-				firstTagAdded = true
+				//hugoFileWriter.WriteString("\"" + matches[1] + "\"")
+				//firstTagAdded = true
+                tag := strings.Replace(matches[1], "'", "", -1)
+                tag = strings.Replace(tag, "\"", "", -1)
+                hugoFileWriter.WriteString("\"" + tag + "\"")
+                firstTagAdded = true
 			}
-			tag := strings.Replace(matches[1], "'", "", -1)
-			tag = strings.Replace(tag, "\"", "", -1)
-			hugoFileWriter.WriteString("\"" + tag + "\"")
-			firstTagAdded = true
 		} else if strings.Contains(octopressLineAsString, "date: ") {
 			parts := strings.Split(octopressLineAsString, " ")
 			hugoFileWriter.WriteString("date = \"" + parts[1] + "\"\n")
@@ -165,6 +165,7 @@ func visit(path string, fileInfo os.FileInfo, err error) error {
 			octoFriendlySlug := octoSlugDate + "/" + octopressFilenameWithoutExtension
 			hugoFileWriter.WriteString("slug = \"" + octoFriendlySlug + "\"\n")
 		} else if strings.Contains(octopressLineAsString, "title: ") {
+            // FIXME title 中包含中文字符的问题
 			// to keep the urls the same as octopress, the title
 			// needs to be the filename
 			parts := strings.Split(octopressFilenameWithoutExtension, "-")
@@ -186,6 +187,10 @@ func visit(path string, fileInfo os.FileInfo, err error) error {
 		} else if strings.Contains(octopressLineAsString, "comments: ") {
 		} else if strings.Contains(octopressLineAsString, "slug: ") {
 		} else if strings.Contains(octopressLineAsString, "wordpress_id: ") {
+		} else if strings.Contains(octopressLineAsString, "wordpress_url: ") {
+		} else if strings.Contains(octopressLineAsString, "author_login: ") {
+		} else if strings.Contains(octopressLineAsString, "author_email: ") {
+		} else if strings.Contains(octopressLineAsString, "date_gmt: ") {
 		} else if strings.Contains(octopressLineAsString, "published: ") {
 			hugoFileWriter.WriteString("published = false\n")
 		} else if strings.Contains(octopressLineAsString, "include_code") {
